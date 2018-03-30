@@ -239,6 +239,141 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://xiaofen9.github.io/blog/blog/2018/03/30/floodlight-rce/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Feng Xiao">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Feng Xiao">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/blog/2018/03/30/floodlight-rce/" itemprop="url">Floodlight Remote Command Execution</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-03-30T21:45:04+08:00">
+                2018-03-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>It is a serious vulnerability in the latest version of Floodlight (V1.2).</p>
+<p>With this vulnerability, an adversary can escalate his privilege to compromise the core Floodlight controller via a compromised OpenFlow switch[1]. For example, he can remotely disconnect the network or monitor any traffic with this vulnerability.</p>
+<p>In Floodlight v1.2, Input validation for manufacturerDescription is missing in net/floodlightcontroller/core/web/SwitchDescription.java:77-89. Floodlight simply retrieves manufacturer name via packet sent by the switch and set it as manufacturerDescription.<br>Hence a malicious switch can set an arbitrary string to manufacturerDescription via OpenFlow Protocol. </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public SwitchDescription(String manufacturerDescription,</span><br><span class="line">        String hardwareDescription, String softwareDescription,</span><br><span class="line">        String serialNumber, String datapathDescription) &#123;</span><br><span class="line">    this.manufacturerDescription = manufacturerDescription;</span><br><span class="line">    this.hardwareDescription = hardwareDescription;</span><br><span class="line">    this.softwareDescription = softwareDescription;</span><br><span class="line">    this.serialNumber = serialNumber;</span><br><span class="line">    this.datapathDescription = datapathDescription;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public SwitchDescription(OFDescStatsReply descStatsReply) &#123;</span><br><span class="line">    this(descStatsReply.getMfrDesc(), descStatsReply.getHwDesc(),</span><br><span class="line">            descStatsReply.getSwDesc(), descStatsReply.getSerialNum(),</span><br><span class="line">            descStatsReply.getDpDesc());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>In Floodlight web console ui/js/models/switchmodel.js:35-42,  Floodlight doesn’t escape manufacturer name. Hence we can inject Cross Site Script payload into the web console to have it access arbitrary rest API to execute an arbitrary command.</p>
+<pre><code>//console.log(&quot;fetching switch &quot; + this.id + &quot; desc&quot;)
+ $.ajax({
+        url:hackBase + &quot;/wm/core/switch/&quot; + self.id + &apos;/desc/json&apos;,
+        dataType:&quot;json&quot;,
+        success:function (data) {
+        //console.log(&quot;fetched  switch &quot; + self.id + &quot; desc&quot;);
+        //console.log(data[&apos;desc&apos;]);
+        self.set(data[&apos;desc&apos;]);
+        }
+        });
+</code></pre><p>[1] It is worth noting that OpenFlow switches are vulnerable to multiple remote attacks (e.g., Buffer Overflow[CVE-2016-2074], Arbitrary Read [CVE-2017-9265]). Hence, it is feasible for adversaries to attack the switch from arbitrary hosts.  </p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://xiaofen9.github.io/blog/blog/2018/01/17/hello-world/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -398,7 +533,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-count">2</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

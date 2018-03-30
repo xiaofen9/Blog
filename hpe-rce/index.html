@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="A New Start for My Security Technology Blog">
+<meta name="description" content="It is vulnerability in the latest version of HPE VAN SDN Controller(2.8.8). With this vulnerability, an adversary can escalate his privilege to compromise the core controller via a compromised OpenFlo">
 <meta property="og:type" content="article">
-<meta property="og:title" content="New Start">
-<meta property="og:url" content="https://xiaofen9.github.io/blog/2018/01/17/hello-world/index.html">
+<meta property="og:title" content="HPE VAN SDN Controller Remote Command Execution">
+<meta property="og:url" content="https://xiaofen9.github.io/blog/hpe-rce/index.html">
 <meta property="og:site_name" content="Feng Xiao">
-<meta property="og:description" content="A New Start for My Security Technology Blog">
+<meta property="og:description" content="It is vulnerability in the latest version of HPE VAN SDN Controller(2.8.8). With this vulnerability, an adversary can escalate his privilege to compromise the core controller via a compromised OpenFlo">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-01-19T09:45:44.340Z">
+<meta property="og:updated_time" content="2018-03-30T14:00:51.336Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="New Start">
-<meta name="twitter:description" content="A New Start for My Security Technology Blog">
+<meta name="twitter:title" content="HPE VAN SDN Controller Remote Command Execution">
+<meta name="twitter:description" content="It is vulnerability in the latest version of HPE VAN SDN Controller(2.8.8). With this vulnerability, an adversary can escalate his privilege to compromise the core controller via a compromised OpenFlo">
 
 
 
@@ -119,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="https://xiaofen9.github.io/blog/2018/01/17/hello-world/"/>
+  <link rel="canonical" href="https://xiaofen9.github.io/blog/hpe-rce/"/>
 
 
 
 
 
-  <title>New Start | Feng Xiao</title>
+  <title>HPE VAN SDN Controller Remote Command Execution | Feng Xiao</title>
   
 
 
@@ -242,7 +242,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://xiaofen9.github.io/blog/blog/2018/01/17/hello-world/">
+    <link itemprop="mainEntityOfPage" href="https://xiaofen9.github.io/blog/blog/hpe-rce/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Feng Xiao">
@@ -259,7 +259,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">New Start</h2>
+          <h2 class="post-title" itemprop="name headline">HPE VAN SDN Controller Remote Command Execution</h2>
         
 
         <div class="post-meta">
@@ -271,8 +271,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-17T18:29:33+08:00">
-                2018-01-17
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-03-30T21:56:54+08:00">
+                2018-03-30
               </time>
             
 
@@ -309,7 +309,22 @@
       
 
       
-        <p>A New Start for My Security Technology Blog </p>
+        <p>It is vulnerability in the latest version of HPE VAN SDN Controller(2.8.8).</p>
+<p>With this vulnerability, an adversary can escalate his privilege to compromise the core controller via a compromised OpenFlow switch[1].<br><a id="more"></a></p>
+<p>The reason for this vulnerability is that HPE VAN controller doesn’t validate switch’s input when querying switch status. Hence, we can set switch’s vendor name to arbitrary strings via a compromised switch.</p>
+<p>In web console sdn/ui/ctl/app/ctl.js:271-288,  HPE VAN doesn’t escape vendor name. Hence we can inject Cross Site Script payload into the web console to have it access arbitrary rest api to execute arbitrary command.</p>
+<p>  function loadDpSummary(view, ctx) {<br>        $.getJSON(‘/sdn/ui/ctl/app/rs/of/datapaths/‘ + ctx, function (data) {<br>            var dpd = data.datapath,<br>                content = t.div(),<br>                dataBoth = t.div(),<br>                dataL = t.div({cls: ‘inline-block’}),<br>                dataR = t.div({cls: ‘inline-block’}),<br>                list,<br>                caps = t.div({cls: ‘inline-list’}),<br>                acts = t.div({cls: ‘inline-list’});</p>
+<pre><code>v.setTitle(view.lion(&apos;title&apos;) + &apos; &apos; + dpd.dpid);
+dataL.append(wgt.propTable({ data: [
+    {l: lct(&apos;mfr&apos;), v: dpd.mfr},
+    {l: lct(&apos;hw&apos;), v: dpd.hw},
+    {l: lct(&apos;sw&apos;), v: dpd.sw},
+    {l: lct(&apos;serial&apos;), v: dpd.serial},
+    {l: lct(&apos;desc&apos;), v: dpd.desc}
+]}));
+</code></pre><p>Here we demonstrate this vulnerability with a video[2].</p>
+<p>[1] It is worth noting that OpenFlow switches are vulnerable to multiple remote attacks (e.g., Buffer Overflow[CVE-2016-2074], Arbitrary Read [CVE-2017-9265]). Hence, it is feasible for adversaries to attack the switch from arbitrary hosts.  </p>
+<p>[2]</p>
 
       
     </div>
@@ -334,15 +349,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/blog/floodlight-rce/" rel="next" title="Floodlight Remote Command Execution">
+                <i class="fa fa-chevron-left"></i> Floodlight Remote Command Execution
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/blog/2018/03/30/floodlight-rce/" rel="prev" title="Floodlight Remote Command Execution">
-                Floodlight Remote Command Execution <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -416,7 +431,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-count">3</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

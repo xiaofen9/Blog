@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="It is a serious vulnerability in the latest version of Floodlight (V1.2). With this vulnerability, an adversary can escalate his privilege to compromise the whole network via a compromised OpenFlow sw">
+<meta name="description" content="WTF: What are researchers looking for when They build Fuzzing tools?This paper is in fact a literature review on recent fuzz papers. I will first introduce some basic ideas of fuzzing. Second, I will">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Floodlight Remote Command Execution">
-<meta property="og:url" content="http://blog.fxiao.me/floodlight-rce/index.html">
+<meta property="og:title" content="What are researchers looking for when they build fuzzing tools">
+<meta property="og:url" content="http://blog.fxiao.me/fuzzer/index.html">
 <meta property="og:site_name" content="Feng&#39;s Blog">
-<meta property="og:description" content="It is a serious vulnerability in the latest version of Floodlight (V1.2). With this vulnerability, an adversary can escalate his privilege to compromise the whole network via a compromised OpenFlow sw">
+<meta property="og:description" content="WTF: What are researchers looking for when They build Fuzzing tools?This paper is in fact a literature review on recent fuzz papers. I will first introduce some basic ideas of fuzzing. Second, I will">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-04-04T12:01:41.608Z">
+<meta property="og:updated_time" content="2019-02-19T16:25:31.207Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Floodlight Remote Command Execution">
-<meta name="twitter:description" content="It is a serious vulnerability in the latest version of Floodlight (V1.2). With this vulnerability, an adversary can escalate his privilege to compromise the whole network via a compromised OpenFlow sw">
+<meta name="twitter:title" content="What are researchers looking for when they build fuzzing tools">
+<meta name="twitter:description" content="WTF: What are researchers looking for when They build Fuzzing tools?This paper is in fact a literature review on recent fuzz papers. I will first introduce some basic ideas of fuzzing. Second, I will">
 
 
 
@@ -119,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://blog.fxiao.me/floodlight-rce/"/>
+  <link rel="canonical" href="http://blog.fxiao.me/fuzzer/"/>
 
 
 
 
 
-  <title>Floodlight Remote Command Execution | Feng's Blog</title>
+  <title>What are researchers looking for when they build fuzzing tools | Feng's Blog</title>
   
 
 
@@ -242,7 +242,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.fxiao.me/floodlight-rce/">
+    <link itemprop="mainEntityOfPage" href="http://blog.fxiao.me/fuzzer/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Feng Xiao">
@@ -259,7 +259,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Floodlight Remote Command Execution</h2>
+          <h2 class="post-title" itemprop="name headline">What are researchers looking for when they build fuzzing tools</h2>
         
 
         <div class="post-meta">
@@ -271,8 +271,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-03-30T21:45:04-04:00">
-                2018-03-30
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-02-12T21:45:04-05:00">
+                2019-02-12
               </time>
             
 
@@ -309,23 +309,29 @@
       
 
       
-        <p>It is a serious vulnerability in the latest version of Floodlight (V1.2).</p>
-<p>With this vulnerability, an adversary can escalate his privilege to compromise the whole network via a compromised OpenFlow switch[1]. For example, he can remotely disconnect the whole network or monitor any traffic with only the switch’s privilege.<br><a id="more"></a></p>
-<p>Here we demonstrate this vulnerability in a video. We first compromised an SDN switch with known security issue, and then we exploit our vulnerability to further attack controller (disconnect <strong>another</strong> switch’s network).<br><div class="video-container"><iframe src="//www.youtube.com/embed/Md30ajgh3qQ" frameborder="0" allowfullscreen></iframe></div></p>
-<p>In Floodlight v1.2, Input validation for manufacturerDescription is missing in net/floodlightcontroller/core/SwitchDescription.java:77-89. Floodlight simply retrieves manufacturer name via packet sent by the switch and set it as manufacturerDescription.<br>Hence a malicious switch can set an arbitrary string to manufacturerDescription via OpenFlow Protocol. </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public SwitchDescription(String manufacturerDescription,</span><br><span class="line">        String hardwareDescription, String softwareDescription,</span><br><span class="line">        String serialNumber, String datapathDescription) &#123;</span><br><span class="line">    this.manufacturerDescription = manufacturerDescription;</span><br><span class="line">    this.hardwareDescription = hardwareDescription;</span><br><span class="line">    this.softwareDescription = softwareDescription;</span><br><span class="line">    this.serialNumber = serialNumber;</span><br><span class="line">    this.datapathDescription = datapathDescription;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public SwitchDescription(OFDescStatsReply descStatsReply) &#123;</span><br><span class="line">    this(descStatsReply.getMfrDesc(), descStatsReply.getHwDesc(),</span><br><span class="line">            descStatsReply.getSwDesc(), descStatsReply.getSerialNum(),</span><br><span class="line">            descStatsReply.getDpDesc());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>In Floodlight web console ui/js/models/switchmodel.js:35-42,  Floodlight doesn’t escape manufacturer name. Hence we can inject Cross Site Script payload into the web console to have it access arbitrary rest API to execute an arbitrary command.</p>
-<pre><code>//console.log(&quot;fetching switch &quot; + this.id + &quot; desc&quot;)
- $.ajax({
-        url:hackBase + &quot;/wm/core/switch/&quot; + self.id + &apos;/desc/json&apos;,
-        dataType:&quot;json&quot;,
-        success:function (data) {
-        //console.log(&quot;fetched  switch &quot; + self.id + &quot; desc&quot;);
-        //console.log(data[&apos;desc&apos;]);
-        self.set(data[&apos;desc&apos;]);
-        }
-        });
-</code></pre><p>[1] It is worth noting that OpenFlow switches are vulnerable to multiple remote attacks (e.g., Buffer Overflow[CVE-2016-2074], Arbitrary Read [CVE-2017-9265]). Hence, it is feasible for adversaries to attack the switch from arbitrary hosts.  </p>
+        <h1 id="WTF-What-are-researchers-looking-for-when-They-build-Fuzzing-tools"><a href="#WTF-What-are-researchers-looking-for-when-They-build-Fuzzing-tools" class="headerlink" title="WTF: What are researchers looking for when They build Fuzzing tools?"></a>WTF: <strong><em>W</em></strong>hat are researchers looking for when <strong><em>T</em></strong>hey build <strong><em>F</em></strong>uzzing tools?</h1><p>This paper is in fact a literature review on recent fuzz papers. I will first introduce some basic ideas of fuzzing. Second, I will review the state-of-the-art fuzzing research works. Finally, I will conclude several key questions researchers are facing when building a fuzzing framework. I will also analyze related papers to discuss their methodologies to answer these research questions.  (I will continuously update this write-up while I read more papers about fuzzing).</p>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>Fuzz is a kind of techniques for bug finding. To evaluate the security and reliability of the target program, fuzzers first generate abnormal inputs and monitor whether there will be a crash or not.</p>
+<p>There are mainly four types of fuzzers: Blackbox fuzzing, mutation-based fuzzing, generation-based fuzzing, and coverage-guided fuzzing. Here we introduce the last three types which are commonly used [1]. </p>
+<a id="more"></a>
+<ul>
+<li><p>Mutation-based fuzzing: Such fuzzer takes a well-formed input, randomly perturb (flipping bit, etc.).  E.g., to obtain such input for a pdf reader, users may crawl a lot of pdf to build a corpus. Pros of this method is that little or no file format knowledge is required. Its limitation is also obvious, the quality of fuzzing is limited by initial corpus, and the inputs can be infinite. </p>
+</li>
+<li><p>Mutation-based fuzzing: Test cases are generated from some description of the input format: RFC, documentation, etc. Anomalies are added to each possible spot in the inputs. The advantage of this method is its completeness. And it can also deal with complex dependencies (e.g, checksum)<br>The disadvantages are that writing generators are difficult, and performance depends on the quality of the generator.</p>
+</li>
+</ul>
+<ul>
+<li>coverage-guided fuzzing: This is a mutation of mutation-based fuzzing. It this method, target problem will be instrumented, and fuzzer will leverage the instrumentation to measure code coverage (Line coverage, Branch coverage, and Path coverage). It will search for mutants that result in coverage increase.  It often uses genetic algorithms, i.e., try random mutations on test corpus and only add mutants to the corpus if coverage increases.</li>
+</ul>
+<h2 id="How-researchers-improved-their-fuzzers"><a href="#How-researchers-improved-their-fuzzers" class="headerlink" title="How researchers improved their fuzzers"></a>How researchers improved their fuzzers</h2><p>In the beginning, I would like to draw a concept-level picture of fuzzing before I analyzed how and where researchers improved their tools.</p>
+<p>Moonshine[2] made contributions by improving OS fuzzers’ kernel code coverage. The problem they want to address is the behavior of some system calls usually depend on shared kernel state created by the previous system calls. As a result, fuzzers usually cannot reach deeper into the system call logic if they cannot have dependent kernel state correctly set. To address this problem, they proposed a static method to analyze real-world program traces in order to find the dependencies of system calls. If their contributions are discussed in the scope of this picture, the main improvement is actually made in the step (1). The dependency identifying process was called “Trace Distillation” in order to better sell their idea, however, the underlying method they employ to carry out the distillation is pretty straightforward, which is <strong>pointer analysis</strong>. Pointer analysis is a fundamental static program analysis. The goal of pointer analysis is to compute an approximation of the set of program objects that a pointer variable or expression can refer to. A interesting insight from this paper is that I found fuzz researches don’t afraid “false positive” as I imagine. I think this is because fuzzers are usually fast and automatic so they can remove these cases in the following steps within seconds. Instead, false negative is way more important in fuzzing context. As a result, I found fuzz researchers usually leverage a “overestimate” style to reduce False negative (increasing FP).</p>
+<h2 id="Research-Questions"><a href="#Research-Questions" class="headerlink" title="Research Questions"></a>Research Questions</h2><p>The key problem for developing a fuzzing tool is how effectively can your newly proposed methodology help guide your fuzzer.<br>This question can be answered from the following aspects.</p>
+<ul>
+<li><strong>RQ1:</strong> Can you discover new vulnerabilities (effective)</li>
+<li><strong>RQ2:</strong> Can you improve code coverage?</li>
+<li><strong>RQ3:</strong> How efficient is your tool?</li>
+<li><strong>RQ4:</strong> How successful for the proposed method to address the key (sub)problem you focus on in this paper?</li>
+</ul>
+<p>[1] <a href="http://www.cs.columbia.edu/~suman/secure_sw_devel/fuzzing.pdf" target="_blank" rel="noopener">http://www.cs.columbia.edu/~suman/secure_sw_devel/fuzzing.pdf</a><br>[2] Pailoor, Shankara, Andrew Aday, and Suman Jana. “MoonShine: Optimizing {OS} Fuzzer Seed Selection with Trace Distillation.” 27th USENIX Security Symposium. 2018.<br>[3] Jeong, Dae R., et al. “Razzer: Finding Kernel Race Bugs through Fuzzing.” Razzer: Finding Kernel Race Bugs through Fuzzing. IEEE S&amp;P, 2018.<br>[4] Petsios, Theofilos, et al. “Nezha: Efficient domain-independent differential testing.” 2017 IEEE Symposium on Security and Privacy (SP). IEEE, 2017.<br>[5]</p>
 
       
     </div>
@@ -350,15 +356,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/floodlight-rce/" rel="next" title="Floodlight Remote Command Execution">
+                <i class="fa fa-chevron-left"></i> Floodlight Remote Command Execution
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/fuzzer/" rel="prev" title="What are researchers looking for when they build fuzzing tools">
-                What are researchers looking for when they build fuzzing tools <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -412,8 +418,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -475,6 +490,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#WTF-What-are-researchers-looking-for-when-They-build-Fuzzing-tools"><span class="nav-number">1.</span> <span class="nav-text">WTF: What are researchers looking for when They build Fuzzing tools?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Background"><span class="nav-number">1.1.</span> <span class="nav-text">Background</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#How-researchers-improved-their-fuzzers"><span class="nav-number">1.2.</span> <span class="nav-text">How researchers improved their fuzzers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Research-Questions"><span class="nav-number">1.3.</span> <span class="nav-text">Research Questions</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

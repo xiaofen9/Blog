@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="Feng&#39;s Blog">
 <meta property="og:description" content="This paper is in fact a literature review on recent fuzz papers. I will first introduce some basic ideas of fuzzing. Second, I will review the state-of-the-art fuzzing research works. Finally, I will">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2019-02-20T03:39:30.526Z">
+<meta property="og:updated_time" content="2019-02-20T03:56:44.693Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="What are researchers looking for when they build fuzzing tools">
 <meta name="twitter:description" content="This paper is in fact a literature review on recent fuzz papers. I will first introduce some basic ideas of fuzzing. Second, I will review the state-of-the-art fuzzing research works. Finally, I will">
@@ -316,13 +316,14 @@
 <ul>
 <li><p>Mutation-based fuzzing: Such fuzzer takes a well-formed input, randomly perturb (flipping bit, etc.).  E.g., to obtain such input for a pdf reader, users may crawl a lot of pdf to build a corpus. Pros of this method is that little or no file format knowledge is required. Its limitation is also obvious, the quality of fuzzing is limited by initial corpus, and the inputs can be infinite. </p>
 </li>
-<li><p>Mutation-based fuzzing: Test cases are generated from some description of the input format: RFC, documentation, etc. Anomalies are added to each possible spot in the inputs. The advantage of this method is its completeness. And it can also deal with complex dependencies (e.g, checksum)<br>The disadvantages are that writing generators are difficult, and performance depends on the quality of the generator.</p>
+<li><p>Generation-based fuzzing: Test cases are generated from some description of the input format: RFC, documentation, etc. Anomalies are added to each possible spot in the inputs. The advantage of this method is its completeness. And it can also deal with complex dependencies (e.g, checksum)<br>The disadvantages are that writing generators are difficult, and performance depends on the quality of the generator.</p>
 </li>
 </ul>
 <ul>
 <li>coverage-guided fuzzing: This is a mutation of mutation-based fuzzing. It this method, target problem will be instrumented, and fuzzer will leverage the instrumentation to measure code coverage (Line coverage, Branch coverage, and Path coverage). It will search for mutants that result in coverage increase.  It often uses genetic algorithms, i.e., try random mutations on test corpus and only add mutants to the corpus if coverage increases.</li>
 </ul>
 <h2 id="How-researchers-improved-their-fuzzers"><a href="#How-researchers-improved-their-fuzzers" class="headerlink" title="How researchers improved their fuzzers"></a>How researchers improved their fuzzers</h2><p>In the beginning, I would like to draw a concept-level picture of fuzzing before I analyzed how and where researchers improved their tools.</p>
+
 <p>Moonshine[2] made contributions by improving OS fuzzers’ kernel code coverage. The problem they want to address is the behavior of some system calls usually depend on shared kernel state created by the previous system calls. As a result, fuzzers usually cannot reach deeper into the system call logic if they cannot have dependent kernel state correctly set. To address this problem, they proposed a static method to analyze real-world program traces in order to find the dependencies of system calls. If their contributions are discussed in the scope of this picture, the main improvement is actually made in the step (1). The dependency identifying process was called “Trace Distillation” in order to better sell their idea, however, the underlying method they employ to carry out the distillation is pretty straightforward, which is <strong>pointer analysis</strong>. Pointer analysis is a fundamental static program analysis. The goal of pointer analysis is to compute an approximation of the set of program objects that a pointer variable or expression can refer to. A interesting insight from this paper is that I found fuzz researches don’t afraid “false positive” as I imagine. I think this is because fuzzers are usually fast and automatic so they can remove these cases in the following steps within seconds. Instead, false negative is way more important in fuzzing context. As a result, I found fuzz researchers usually leverage a “overestimate” style to reduce False negative (increasing FP).</p>
 <h2 id="Research-Questions"><a href="#Research-Questions" class="headerlink" title="Research Questions"></a>Research Questions</h2><p>The key problem for developing a fuzzing tool is how effectively can your newly proposed methodology help guide your fuzzer.<br>This question can be answered from the following aspects.</p>
 <ul>

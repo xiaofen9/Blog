@@ -86,10 +86,12 @@
 <meta property="og:site_name" content="Feng&#39;s Blog">
 <meta property="og:description" content="In this post, I will play with some classic heap exploitation tricks in Linux Glibc, in order to better understand the linux kernel heap management.">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2019-03-25T03:02:53.820Z">
+<meta property="og:image" content="http://blog.fxiao.me/how-to-heap/fastbin.png">
+<meta property="og:updated_time" content="2019-03-25T03:05:17.610Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="How to heap?">
 <meta name="twitter:description" content="In this post, I will play with some classic heap exploitation tricks in Linux Glibc, in order to better understand the linux kernel heap management.">
+<meta name="twitter:image" content="http://blog.fxiao.me/how-to-heap/fastbin.png">
 
 
 
@@ -314,7 +316,7 @@
 <h1 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h1><p>Heap is a logically continuous area that consists of many chunks. For heap allocator such as ptmalloc, the minimum operation unit is the chunk. Chunks are classified into 4 different categories. 1. Allocated chunk 2, Free chunk; 3, Top chunk; 4. Last Remainder chunk.</p>
 <h3 id="Fastbin"><a href="#Fastbin" class="headerlink" title="Fastbin"></a>Fastbin</h3><p>Fastbin is one of the four freelist data structures (fast bin, unsorted bin, small bin, large bin) that are used to hold free chunks. Many attacks relates to fastbins.<br>In malloc_state (heap header), there is an array called fastbinsY that manages the fast bins. In Linux, chunks that are smaller than MAX_FAST_SIZE (80 on 32-bit machine, 160 on 64-bit machine) will be treated as fastbins. The figure below demonstrates the runtime structure of fastbin.</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1570	/* The maximum fastbin request size we support */</span><br><span class="line">1571	#define MAX_FAST_SIZE     (80 * SIZE_SZ / 4)</span><br></pre></td></tr></table></figure>
-
+<img src="/how-to-heap/fastbin.png">
 <h1 id="Techniques"><a href="#Techniques" class="headerlink" title="Techniques"></a>Techniques</h1><h3 id="fastbin-dup-consolidate"><a href="#fastbin-dup-consolidate" class="headerlink" title="fastbin_dup_consolidate"></a>fastbin_dup_consolidate</h3><p><a href="https://github.com/shellphish/how2heap/blob/master/glibc_2.25/fastbin_dup_into_stack.c" target="_blank" rel="noopener">fastbin_dup_into_stack</a> introduce a technique to forge a fake chunk by heap overflowing a specific fast bin’s <code>FD</code> to the target address.</p>
 <p>The trick has three steps. Step 1, we put the a victim chunk into bins by freeing it. Step 2, we need a double free or heap overflow to modified the victim chunk’s fd to the target address to claim that there is another chunk there. It is worth noting that in order to pass the malloc check we also need the allocation point at the target address has a legal <code>size</code>.  Step 3, we malloc two times. The first time will put the fake chunk at the head of free list. The second time will malloc a chunk at the target address.</p>
 <p>The 0ctfbabyheap challenge can be solved with this trick. The trick was used for two times. In the first time, we are trying to leak the libc base. To achieve this goal, we forge a fast chunk at the smallbins (Our target address is at smallbin is because smallbin has <code>bk</code> pointer which points to the <code>main_arena</code> when the smallbin is at the head of smallbin free list). The following code demonstrate the processs.</p>

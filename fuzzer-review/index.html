@@ -87,7 +87,7 @@
 <meta property="og:description" content="This paper is in fact a literature review on recent fuzz papers. I will first introduce some basic ideas of fuzzing. Second, I will review the state-of-the-art fuzzing research works. Finally, I will">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="http://blog.fxiao.me/fuzzer-review/arch.png">
-<meta property="og:updated_time" content="2019-03-07T02:52:02.770Z">
+<meta property="og:updated_time" content="2019-03-25T03:05:01.341Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="What are researchers looking for when they build fuzzing tools">
 <meta name="twitter:description" content="This paper is in fact a literature review on recent fuzz papers. I will first introduce some basic ideas of fuzzing. Second, I will review the state-of-the-art fuzzing research works. Finally, I will">
@@ -312,9 +312,9 @@
 
       
         <p>This paper is in fact a literature review on recent fuzz papers. I will first introduce some basic ideas of fuzzing. Second, I will review the state-of-the-art fuzzing research works. Finally, I will conclude several key questions researchers are facing when building a fuzzing framework. I will also analyze related papers to discuss their methodologies to answer these research questions.  (I will continuously update this write-up while I read more papers about fuzzing).</p>
+<a id="more"></a>
 <h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>Fuzz is a kind of techniques for bug finding. To evaluate the security and reliability of the target program, fuzzers first generate abnormal inputs and monitor whether there will be a crash or not.</p>
 <p>There are mainly four types of fuzzers: Blackbox fuzzing, mutation-based fuzzing, generation-based fuzzing, and coverage-guided fuzzing. Here we introduce the last three types which are commonly used [1]. </p>
-<a id="more"></a>
 <ul>
 <li><p>Mutation-based fuzzing: Such fuzzer takes a well-formed input, randomly perturb (flipping bit, etc.).  E.g., to obtain such input for a pdf reader, users may crawl a lot of pdf to build a corpus. Pros of this method is that little or no file format knowledge is required. Its limitation is also obvious, the quality of fuzzing is limited by initial corpus, and the inputs can be infinite. </p>
 </li>

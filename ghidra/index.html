@@ -79,13 +79,17 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="Feng&#39;s Blog">
-<meta property="og:url" content="http://blog.fxiao.me/index.html">
+<meta name="description" content="IntroductionArchiving the intermediate analysis result and sharing with other researchers is a common practice in the field of binary analysis. Popular disassemblers such as IDA and Ghidra also provid">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Do Not Trust! Ghidra Arbitrary Command Exrcution Through Project Sharing">
+<meta property="og:url" content="http://blog.fxiao.me/ghidra/index.html">
 <meta property="og:site_name" content="Feng&#39;s Blog">
+<meta property="og:description" content="IntroductionArchiving the intermediate analysis result and sharing with other researchers is a common practice in the field of binary analysis. Popular disassemblers such as IDA and Ghidra also provid">
 <meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-07-15T14:13:15.344Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Feng&#39;s Blog">
+<meta name="twitter:title" content="Do Not Trust! Ghidra Arbitrary Command Exrcution Through Project Sharing">
+<meta name="twitter:description" content="IntroductionArchiving the intermediate analysis result and sharing with other researchers is a common practice in the field of binary analysis. Popular disassemblers such as IDA and Ghidra also provid">
 
 
 
@@ -115,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://blog.fxiao.me/"/>
+  <link rel="canonical" href="http://blog.fxiao.me/ghidra/"/>
 
 
 
 
 
-  <title>Feng's Blog</title>
+  <title>Do Not Trust! Ghidra Arbitrary Command Exrcution Through Project Sharing | Feng's Blog</title>
   
 
 
@@ -140,8 +144,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -224,9 +227,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -256,9 +259,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/ghidra/" itemprop="url">Do Not Trust! Ghidra Arbitrary Command Exrcution Through Project Sharing</a></h2>
+          <h2 class="post-title" itemprop="name headline">Do Not Trust! Ghidra Arbitrary Command Exrcution Through Project Sharing</h2>
         
 
         <div class="post-meta">
@@ -308,9 +309,7 @@
       
 
       
-        
-          
-            <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>Archiving the intermediate analysis result and sharing with other researchers is a common practice in the field of binary analysis. Popular disassemblers such as IDA and Ghidra also provide the project archiving functionality to help researchers communicating their results. However, it turns out that such project sharing is not secure (at all). For example, researchers have found that an XXE vulnerability existed in the project parsing logic of Ghidra, which can be abused to achieve arbitrary file read or even command execution on a particular platform(i.e., Windows). In this post, we are presenting an even more powerful exploit chain discovered in Ghidra, which can be exploited via a malicious project archive to execute arbitrary code in the victim machine no matter what platform he is using.</p>
+        <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>Archiving the intermediate analysis result and sharing with other researchers is a common practice in the field of binary analysis. Popular disassemblers such as IDA and Ghidra also provide the project archiving functionality to help researchers communicating their results. However, it turns out that such project sharing is not secure (at all). For example, researchers have found that an XXE vulnerability existed in the project parsing logic of Ghidra, which can be abused to achieve arbitrary file read or even command execution on a particular platform(i.e., Windows). In this post, we are presenting an even more powerful exploit chain discovered in Ghidra, which can be exploited via a malicious project archive to execute arbitrary code in the victim machine no matter what platform he is using.</p>
 <h2 id="Vulnerablity-Description"><a href="#Vulnerablity-Description" class="headerlink" title="Vulnerablity Description"></a>Vulnerablity Description</h2><p>A path traversal vulnerability exists in RestoreTask.java from package ghidra.app.plugin.core.archive. This vulnerability allows attackers to overwrite arbitrary files on the system. To achieve arbitrary code execution, one of the solutions is to overwrite some critical ghidra modules, e.g., decompile module (In this case we need to know the installation path of ghidra).</p>
 <h2 id="Exploit-Analysis"><a href="#Exploit-Analysis" class="headerlink" title="Exploit Analysis"></a>Exploit Analysis</h2><p>The arbitrary code execution exploit chain consists of two nodes. The first node overwrites arbitrary files in the system, and the second node executes the malware containing in the crafted project file.</p>
 <h3 id="Overwrite-Arbitrary-File"><a href="#Overwrite-Arbitrary-File" class="headerlink" title="Overwrite Arbitrary File"></a>Overwrite Arbitrary File</h3><p>In Ghidra, every project is a jar archive file. When restoring a project, Ghidra will extract the project files and store them in the file system. However, Ghidra doesn’t check whether the file name of every archive entity is legal or not. By inserting a malicious binary with a file name starting with <strong>../</strong>, attackers are able to let ghidra overwrite arbitrary files on the system.</p>
@@ -320,8 +319,6 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">private void setup() throws IOException &#123;</span><br><span class="line">    if (disposestate != DisposeState.NOT_DISPOSED) &#123;</span><br><span class="line">        throw new IOException(&quot;Decompiler has been disposed&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    if (nativeProcess != null) &#123;</span><br><span class="line">        // Something bad happened to the process or the interface</span><br><span class="line">        // and now we try to restart            </span><br><span class="line">        nativeProcess.destroy(); // Make sure previous bad process is killed                    </span><br><span class="line">        nativeProcess = null;</span><br><span class="line">    &#125;</span><br><span class="line">    if (exepath == null) &#123;</span><br><span class="line">        throw new IOException(&quot;Could not find decompiler executable&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    try &#123;</span><br><span class="line">        nativeProcess = runtime.exec(exepath);</span><br><span class="line"></span><br><span class="line">        nativeIn = nativeProcess.getInputStream();</span><br><span class="line">        nativeOut = nativeProcess.getOutputStream();</span><br><span class="line">        statusGood = true;</span><br><span class="line">    &#125;</span><br><span class="line">    catch (IOException e) &#123;</span><br><span class="line">        disposestate = DisposeState.DISPOSED_ON_STARTUP_FAILURE;</span><br><span class="line">        statusGood = false;</span><br><span class="line">        Msg.showError(this, null, &quot;Problem launching decompiler&quot;,</span><br><span class="line">            &quot;Please report this stack trace to the Ghidra Team&quot;, e);</span><br><span class="line">        throw e;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="Attack-Demo"><a href="#Attack-Demo" class="headerlink" title="Attack Demo"></a>Attack Demo</h2><p>Here is a demo of the attack behavior. (<a href="https://youtu.be/RGqQMUd9hZM)[https://youtu.be/RGqQMUd9hZM" target="_blank" rel="noopener">https://youtu.be/RGqQMUd9hZM)[https://youtu.be/RGqQMUd9hZM</a>]</p>
 
-          
-        
       
     </div>
     
@@ -338,136 +335,28 @@
       
 
       
-
-      
-
       
       
-        <div class="post-eof"></div>
+
       
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.fxiao.me/how-to-heap/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Feng Xiao">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Feng's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/how-to-heap/" itemprop="url">How to heap?</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
             
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-03-21T16:32:32-04:00">
-                2019-03-21
-              </time>
+              <a href="/how-to-heap/" rel="next" title="How to heap?">
+                <i class="fa fa-chevron-left"></i> How to heap?
+              </a>
             
+          </div>
 
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
             
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
+          </div>
         </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          <p>In this post, I will play with some classic heap exploitation tricks in Linux Glibc, in order to better understand the linux kernel heap management.</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/how-to-heap/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -477,383 +366,11 @@
   </article>
 
 
-    
-      
 
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.fxiao.me/got-plt/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Feng Xiao">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Feng's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/got-plt/" itemprop="url">Pwn the GOT!</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-03-02T15:38:15-05:00">
-                2019-03-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>In this post we study how system handle dynamically linked functions (external functions). I will first illustrate the process of how system find the linked function address for a given elf. And I will play with a pretty simple ctf example to illustrate how we can hijack related data structure (GOT table) in order to achieve our goal.<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/got-plt/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
+    <div class="post-spread">
       
     </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
   </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.fxiao.me/fuzzer-review/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Feng Xiao">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Feng's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/fuzzer-review/" itemprop="url">What are researchers looking for when they build fuzzing tools</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-02-19T22:35:05-05:00">
-                2019-02-19
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>This paper is in fact a literature review on recent fuzz papers. I will first introduce some basic ideas of fuzzing. Second, I will review the state-of-the-art fuzzing research works. Finally, I will conclude several key questions researchers are facing when building a fuzzing framework. I will also analyze related papers to discuss their methodologies to answer these research questions.  (I will continuously update this write-up while I read more papers about fuzzing).</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/fuzzer-review/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.fxiao.me/floodlight-rce/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Feng Xiao">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Feng's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/floodlight-rce/" itemprop="url">Floodlight Remote Command Execution</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-03-30T21:45:04-04:00">
-                2018-03-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>It is a serious vulnerability in the latest version of Floodlight (V1.2).</p>
-<p>With this vulnerability, an adversary can escalate his privilege to compromise the whole network via a compromised OpenFlow switch[1]. For example, he can remotely disconnect the whole network or monitor any traffic with only the switch’s privilege.<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/floodlight-rce/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-  </section>
-
-  
 
 
           </div>
@@ -861,6 +378,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -883,8 +404,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -946,6 +476,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Vulnerablity-Description"><span class="nav-number">2.</span> <span class="nav-text">Vulnerablity Description</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Exploit-Analysis"><span class="nav-number">3.</span> <span class="nav-text">Exploit Analysis</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Overwrite-Arbitrary-File"><span class="nav-number">3.1.</span> <span class="nav-text">Overwrite Arbitrary File</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Code-Execution"><span class="nav-number">3.2.</span> <span class="nav-text">Code Execution</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Attack-Demo"><span class="nav-number">4.</span> <span class="nav-text">Attack Demo</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -1074,6 +620,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
